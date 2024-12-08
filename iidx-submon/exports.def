@@ -1,0 +1,9 @@
+LIBRARY iidx-submon
+
+EXPORTS
+    iidx_submon_init
+    iidx_submon_get_resist
+    iidx_submon_get_slider
+    iidx_submon_get_led_mask
+    iidx_submon_set_16seg
+    iidx_submon_finl
