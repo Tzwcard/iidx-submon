@@ -11,6 +11,7 @@
 #include "iidx-sub-gui-effector.h"
 #include "iidx-sub-gui-resist.h"
 #include "iidx-sub-gui-led.h"
+#include "iidx-sub-gui-keypad.h"
 
 #ifdef DEBUG_BUILD
 #define SIXTEEN_SEG_DEBUG
@@ -33,6 +34,9 @@ struct ctx_iidx_iodata {
 
     // LED COLOR, RESERVED NOW
     uint32_t led_color;
+
+    // KEYPAD
+    uint16_t keypad[2];
 };
 
 static ctx_iidx_iodata _iodata = { 0 };
@@ -43,6 +47,7 @@ static int gui_draw_control_frame(void);
 static int gui_draw_effector(void);
 static int gui_draw_tt_resist(void);
 static int gui_draw_led(void);
+static int gui_draw_keypad(void);
 static int get_io(void);
 
 static float _16seg_height = 0.f,
@@ -60,6 +65,7 @@ enum class E_DISPLAY_TYPE {
     EFFECTOR,
     RESIST,
     LED_PANEL,
+    KEYPAD,
 };
 
 struct ctx_gui_btn_info {
@@ -83,11 +89,14 @@ static _16SEG _chr[9];
 /************* EFFECTOR *************/
 static _EFFECTOR _eff;
 
-/************* EFFECTOR *************/
+/************* TTRESIST *************/
 static _RESIST _ttresist;
 
-/************* EFFECTOR *************/
+/**************** LED ***************/
 static _LED _led;
+
+/************** KEYPAD **************/
+static _KEYPAD _keypad;
 
 int iidx_sub_gui(void) {
     get_io();
@@ -133,7 +142,7 @@ int iidx_sub_gui(void) {
         _touch_point.x,
         _touch_point.y
     );
-    ImGui::Text("SLIDER: %d %d %d %d %d, RESIST: %d %d, LED: %05x",
+    ImGui::Text("SLIDER: %d %d %d %d %d, RESIST: %d %d, LED: %05x, KEYPAD: %04x %04x",
         _iodata.slider[0],
         _iodata.slider[1],
         _iodata.slider[2],
@@ -141,7 +150,9 @@ int iidx_sub_gui(void) {
         _iodata.slider[4],
         _iodata.resist[0],
         _iodata.resist[1],
-        _iodata.led_mask
+        _iodata.led_mask,
+        _iodata.keypad[0],
+        _iodata.keypad[1]
     );
 #endif
 
@@ -156,6 +167,9 @@ int iidx_sub_gui(void) {
         break;
     case E_DISPLAY_TYPE::LED_PANEL:
         gui_draw_led();
+        break;
+    case E_DISPLAY_TYPE::KEYPAD:
+        gui_draw_keypad();
         break;
     }
 
@@ -242,6 +256,12 @@ static int init_coord(ImGuiViewport* viewport) {
         _line_width
     );
 
+    _keypad.init(
+        ImVec2(_pos_window.x, _pos_window.y + height_16seg),
+        ImVec2(_sz_window.x, _control_height),
+        _line_width
+    );
+
     // BTNS
     ctx_gui_btn_info tmp;
     int btns = 3;
@@ -282,6 +302,34 @@ static int init_coord(ImGuiViewport* viewport) {
     tmp.type = E_DISPLAY_TYPE::LED_PANEL;
     tmp.p_box_check[0] = ImVec2(btn_x + 2.f * btn_w, btn_y);
     tmp.p_box_check[1] = ImVec2(btn_x + 3.f * btn_w, _sz_window.y);
+    tmp.p_box_draw[0] = ImVec2(
+        tmp.p_box_check[0].x + _pos_window.x,
+        tmp.p_box_check[0].y + _pos_window.y
+    );
+    tmp.p_box_draw[1] = ImVec2(
+        tmp.p_box_check[1].x + _pos_window.x,
+        tmp.p_box_check[1].y + _pos_window.y
+    );
+    _btn.push_back(tmp);
+
+    tmp.text = "KEYPAD_1P";
+    tmp.type = E_DISPLAY_TYPE::KEYPAD;
+    tmp.p_box_check[0] = ImVec2(0.f, btn_y);
+    tmp.p_box_check[1] = ImVec2(btn_w, _sz_window.y);
+    tmp.p_box_draw[0] = ImVec2(
+        tmp.p_box_check[0].x + _pos_window.x,
+        tmp.p_box_check[0].y + _pos_window.y
+    );
+    tmp.p_box_draw[1] = ImVec2(
+        tmp.p_box_check[1].x + _pos_window.x,
+        tmp.p_box_check[1].y + _pos_window.y
+    );
+    _btn.push_back(tmp);
+
+    tmp.text = "KEYPAD_2P";
+    tmp.type = E_DISPLAY_TYPE::KEYPAD;
+    tmp.p_box_check[0] = ImVec2(_sz_window.x - btn_w, btn_y);
+    tmp.p_box_check[1] = ImVec2(_sz_window.x, _sz_window.y);
     tmp.p_box_draw[0] = ImVec2(
         tmp.p_box_check[0].x + _pos_window.x,
         tmp.p_box_check[0].y + _pos_window.y
@@ -434,6 +482,38 @@ static int gui_draw_control_frame(void) {
                     _display_type == it.type ? IM_COL32(255, 255, 255, 255) : IM_COL32(0, 0, 0, 255)
                 );
                 break;
+            case E_DISPLAY_TYPE::KEYPAD:
+            {
+                auto _sz_num = (it.p_box_draw[1].y - it.p_box_draw[0].y) / 5.f;
+                drawList->AddRect(
+                    ImVec2(
+                        it.p_box_draw[0].x + (_sz_num * 1.f),
+                        it.p_box_draw[0].y + (_sz_num / 2.f)
+                    ),
+                    ImVec2(
+                        it.p_box_draw[1].x - (_sz_num * 1.f),
+                        it.p_box_draw[1].y - (_sz_num / 2.f)
+                    ),
+                    _display_type == it.type ? IM_COL32(0, 0, 0, 255) : IM_COL32(255, 255, 255, 255),
+                    1.f,
+                    0,
+                    2.f
+                );
+                for (int i = 0; i < 12; i++) {
+                    drawList->AddRectFilled(
+                        ImVec2(
+                            it.p_box_draw[0].x + (_sz_num * 1.f) + (int)(i % 3) * _sz_num + _sz_num * 0.2f,
+                            it.p_box_draw[0].y + (_sz_num / 2.f) + (int)(i / 3) * _sz_num + _sz_num * 0.2f
+                        ),
+                        ImVec2(
+                            it.p_box_draw[0].x + (_sz_num * 1.f) + (int)(i % 3) * _sz_num + _sz_num * 0.8f,
+                            it.p_box_draw[0].y + (_sz_num / 2.f) + (int)(i / 3) * _sz_num + _sz_num * 0.8f
+                        ),
+                        _display_type == it.type ? IM_COL32(0, 0, 0, 255) : IM_COL32(255, 255, 255, 255)
+                    );
+                }
+            }
+                break;
             default:
                 drawList->AddText(
                     0, sz_font,
@@ -479,6 +559,16 @@ static int gui_draw_led(void) {
         ImDrawList* drawList = ImGui::GetWindowDrawList();
 
         _led.draw(drawList);
+    }
+
+    return 1;
+}
+
+static int gui_draw_keypad(void) {
+    if (set_coord) {
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+        _keypad.draw(drawList);
     }
 
     return 1;
@@ -549,6 +639,12 @@ static int get_io(void) {
             tstate
         );
         break;
+    case E_DISPLAY_TYPE::KEYPAD:
+        _keypad.fetch_touch(
+            ImVec2(_touch_point.x, _touch_point.y - _16seg_height),
+            tstate
+        );
+        break;
     }
 
     for (int i = 0; i < 5; i++) {
@@ -563,6 +659,10 @@ static int get_io(void) {
 
     for (int i = 0; i < 9; i++) {
         _chr[i].set_draw_ch(_iodata.seg[i]);
+    }
+
+    for (int i = 0; i < 2; i++) {
+        _iodata.keypad[i] = _keypad.get(i);
     }
 
     return 1;
@@ -587,6 +687,10 @@ char iidx_sub_gui_get_slider(char i) {
 
 uint32_t iidx_sub_gui_get_led_mask(void) {
     return _iodata.led_mask;
+}
+
+uint16_t iidx_sub_gui_get_keypad(char a) {
+    return _iodata.keypad[a & 1];
 }
 
 /********************************************************************/

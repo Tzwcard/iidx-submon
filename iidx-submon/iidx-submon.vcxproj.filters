@@ -63,6 +63,9 @@
     <ClInclude Include="imgui\iidx-sub-gui-defs.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="imgui\iidx-sub-gui-keypad.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -99,6 +102,9 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgtest.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\iidx-sub-gui-keypad.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
   </ItemGroup>

@@ -343,7 +343,13 @@ int gui_main(void)
         ::SwapBuffers(g_MainWindow.hDC);
     }
 
-    UninstallTouchHook();
+    if (is_touch_available) {
+        if (hwnd_iidx) {
+            UninstallTouchHook();
+            UnregisterTouchWindow(hwnd_iidx);
+        }
+        UnregisterTouchWindow(hwnd_submon);
+    }
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplWin32_Shutdown();

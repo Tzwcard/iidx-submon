@@ -68,6 +68,14 @@ bool iidx_submon_set_16seg(unsigned char* seg) {
 }
 
 /*
+ * Get keypad value
+ * return keypad state for player p
+ */
+uint16_t iidx_submon_get_keypad(char p) {
+	return iidx_sub_gui_get_keypad(p);
+}
+
+/*
  * Finalize submon module
  */
 void iidx_submon_finl(void) {

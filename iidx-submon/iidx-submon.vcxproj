@@ -156,6 +156,7 @@
     <ClInclude Include="imgui\iidx-sub-gui-defs.h" />
     <ClInclude Include="imgui\iidx-sub-gui-16seg.h" />
     <ClInclude Include="imgui\iidx-sub-gui-effector.h" />
+    <ClInclude Include="imgui\iidx-sub-gui-keypad.h" />
     <ClInclude Include="imgui\iidx-sub-gui-led.h" />
     <ClInclude Include="imgui\iidx-sub-gui-resist.h" />
     <ClInclude Include="imgui\iidx-sub-gui.h" />
@@ -180,6 +181,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="imgui\iidx-sub-gui-effector.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="imgui\iidx-sub-gui-keypad.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
