@@ -48,6 +48,7 @@ static int gui_draw_effector(void);
 static int gui_draw_tt_resist(void);
 static int gui_draw_led(void);
 static int gui_draw_keypad(void);
+static int gui_draw_touch_circle(void);
 static int get_io(void);
 
 static float _16seg_height = 0.f,
@@ -80,7 +81,7 @@ static std::vector<ctx_gui_btn_info> _btn;
 
 /*************   TOUCH  *************/
 static ImVec2 _touch_point;
-static int _touch_state = 0;
+static int _touch_state = 0, _touch_state_poll = 0;
 static DWORD _touch_current = 0xffffffff;
 
 /*************   16SEG  *************/
@@ -174,6 +175,7 @@ int iidx_sub_gui(void) {
     }
 
     gui_draw_control_frame();
+    gui_draw_touch_circle();
 
     ImGui::End();
     ImGui::PopStyleColor();
@@ -534,6 +536,26 @@ static int gui_draw_control_frame(void) {
     return 1;
 }
 
+static int gui_draw_touch_circle(void) {
+    if (_touch_state > 0) {
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        auto viewport = ImGui::GetMainViewport();
+
+        drawList->AddCircle(
+            ImVec2(
+                _touch_point.x + viewport->Pos.x, 
+                _touch_point.y + viewport->Pos.y
+            ),
+            20.f,
+            IM_COL32(255, 255, 255, 255),
+            0,
+            2.f
+        );
+    }
+
+    return 1;
+}
+
 static int gui_draw_effector(void) {
     if (set_coord) {
         ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -594,13 +616,28 @@ static int get_io(void) {
     }
 #endif
 
-    if (_touch_state == 1) {
+    // Add a polled touch state here
+    // Forget that Game Window hook and Submon poll is not in-sync or in same thread
+    // For example if main window running at like double the frame rate of touch screen
+    // then it will never able to grab the TOUCH_DOWN message
+    _touch_state_poll = _touch_state ? (_touch_state_poll == 0 ? 1 : _touch_state) : 0;
+
+    if (_touch_state_poll == 1) {
         for (const auto& it : _btn) {
             if (_touch_point.x >= it.p_box_check[0].x
                 && _touch_point.y >= it.p_box_check[0].y
                 && _touch_point.x <= it.p_box_check[1].x
                 && _touch_point.y <= it.p_box_check[1].y
                 ) {
+#if 0
+                printf("CHECK BTN: (%f, %f) ~ (%f, %f)-(%f, %f)\n",
+                    _touch_point.x, _touch_point.y,
+                    it.p_box_check[0].x,
+                    it.p_box_check[0].y,
+                    it.p_box_check[1].x,
+                    it.p_box_check[1].y
+                );
+#endif
                 _display_type = _display_type == it.type ? E_DISPLAY_TYPE::NONE : it.type;
                 break;
             }
@@ -608,7 +645,7 @@ static int get_io(void) {
     }
 
     IIDX_SUBMON::E_TOUCH_STATE tstate = IIDX_SUBMON::E_TOUCH_STATE::UP;
-    switch (_touch_state) {
+    switch (_touch_state_poll) {
     case 1:
         tstate = IIDX_SUBMON::E_TOUCH_STATE::DOWN;
         break;

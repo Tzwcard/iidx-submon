@@ -449,7 +449,8 @@ static const char* bm2dx_class_prefix[] = {
 
 BOOL CALLBACK WindowEnumProcFind(HWND hwnd, LPARAM lParam) {
     auto data = reinterpret_cast<HWND*>(lParam);
-    char className[256];
+    char className[256] = { 0 };
+
     if (GetClassNameA(hwnd, className, sizeof(className))) {
         bool is_match = false;
         if (!strcmp("C02", className)) {
@@ -461,6 +462,11 @@ BOOL CALLBACK WindowEnumProcFind(HWND hwnd, LPARAM lParam) {
                     is_match = true;
                 }
             }
+        }
+
+        // Add MAME emulator check if want to use on Twinkle games
+        if (!is_match && !strcmp("MAME", className)) {
+            is_match = true;
         }
 
         if (is_match) {
