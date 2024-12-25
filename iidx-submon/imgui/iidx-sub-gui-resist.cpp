@@ -1,4 +1,5 @@
 #include "iidx-sub-gui-resist.h"
+#include <cmath>
 
 static const auto COL_GREY = IM_COL32(40, 40, 40, 255),
 COL_WHITE = IM_COL32(255, 255, 255, 255),
@@ -63,6 +64,10 @@ int _RESIST::init(ImVec2 pos, ImVec2 size, float line) {
 	return 1;
 }
 
+static unsigned char _resist_values[] = {
+	0, 211, 215, 223, 231, 235, 239, 243, 247, 251
+};
+
 unsigned char _RESIST::get(int id) {
 	if (id < 0 || id > 1) {
 		return 0;
@@ -71,8 +76,15 @@ unsigned char _RESIST::get(int id) {
 
 	if (_flt > 1.f) _flt = 1.f;
 	else if (_flt < 0.f) _flt = 0.f;
-
+#ifdef RESIST_NOCAP
 	return (unsigned char)(_flt * 255 + 0.5f);
+#else
+	size_t index = static_cast<size_t>(std::floor(_flt * _countof(_resist_values)));
+
+	if (index >= _countof(_resist_values)) index = _countof(_resist_values) - 1;
+
+	return _resist_values[index];
+#endif
 }
 
 int _RESIST::draw(ImDrawList* drawList) {
@@ -104,6 +116,14 @@ int _RESIST::draw(ImDrawList* drawList) {
 
 		if (_flt > 1.f) _flt = 1.f;
 		else if (_flt < 0.f) _flt = 0.f;
+
+#ifndef RESIST_NOCAP
+		size_t index = static_cast<size_t>(std::floor(_flt * _countof(_resist_values)));
+
+		if (index >= _countof(_resist_values)) index = _countof(_resist_values) - 1;
+
+		_flt = (float)index / (_countof(_resist_values) - 1);
+#endif
 
 		float _flt_draw = 1.f - _flt;
 
