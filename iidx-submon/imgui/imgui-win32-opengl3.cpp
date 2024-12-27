@@ -22,20 +22,25 @@
 #include "imgui-win32-opengl3.h"
 
 #include "iidx-sub-gui.h"
-#include "imgtest.h"
 
 #pragma comment(lib, "opengl32.lib")
-
-#define SUBMON_WIDTH  1920
-#define SUBMON_HEIGHT 1080
 
 #ifdef DEBUG_BUILD
 #define USE_CUSTOM_RESOLUTION
 // #define DRAW_IMG_CLICKER
-
-#include "drawsvg.h"
-static bool _is_last_pressed_draw = false;
+// #define ENABLE_SVG_EXPORT
 #endif
+
+#ifdef DRAW_IMG_CLICKER
+#include "imgtest.h"
+#endif
+
+#ifdef ENABLE_SVG_EXPORT
+#include "drawsvg.h"
+#endif
+
+#define SUBMON_WIDTH  1920
+#define SUBMON_HEIGHT 1080
 
 struct CTX_FINDMONITOR {
     HMONITOR gameMonitor;
@@ -62,10 +67,10 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 static WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"CLS_BM2DX_BI2X_SUBMONITOR", nullptr };
 
-void SetMonitorResolution(MONITORINFOEX*);
-BOOL CALLBACK WindowEnumProcFind(HWND hwnd, LPARAM lParam);
-BOOL CALLBACK MonitorEnumProcCount(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
-BOOL CALLBACK MonitorEnumProcGet(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
+static void SetMonitorResolution(MONITORINFOEX*);
+static BOOL CALLBACK WindowEnumProcFind(HWND hwnd, LPARAM lParam);
+static BOOL CALLBACK MonitorEnumProcCount(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
+static BOOL CALLBACK MonitorEnumProcGet(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 
 static int gui_get_monitor_nr(void);
 static int gui_get_submon_and_game_hwnd(void);
@@ -327,17 +332,8 @@ int gui_main(void)
         // Rendering
         ImGui::Render();
 
-#ifdef DEBUG_BUILD
-        if (GetAsyncKeyState(VK_SNAPSHOT) & 0x8000) {
-            if (!_is_last_pressed_draw) {
-                ImGui::EndFrame();
-                ImDrawData* draw_list = ImGui::GetDrawData();
-                ExportDrawDataToSVG("output.svg", draw_list);
-            }
-            _is_last_pressed_draw = true;
-        }
-        else
-            _is_last_pressed_draw = false;
+#ifdef ENABLE_SVG_EXPORT
+        CheckSVGExport();
 #endif
 
         glViewport(0, 0, g_Width, g_Height);
@@ -442,13 +438,14 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
-BOOL CALLBACK MonitorEnumProcCount(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+/*********************************** My Functions ***********************************/
+static BOOL CALLBACK MonitorEnumProcCount(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
     auto c = reinterpret_cast<int*>(dwData);
     *c += 1;
     return TRUE;
 }
 
-BOOL CALLBACK MonitorEnumProcGet(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+static BOOL CALLBACK MonitorEnumProcGet(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
     auto target = reinterpret_cast<CTX_FINDMONITOR*>(dwData);
     if (hMonitor != target->gameMonitor) {
         target->targetMonitor = hMonitor;
@@ -463,7 +460,7 @@ static const char* bm2dx_class_prefix[] = {
     "beatmania IIDX",
 };
 
-BOOL CALLBACK WindowEnumProcFind(HWND hwnd, LPARAM lParam) {
+static BOOL CALLBACK WindowEnumProcFind(HWND hwnd, LPARAM lParam) {
     auto data = reinterpret_cast<HWND*>(lParam);
     char className[256] = { 0 };
 
@@ -494,7 +491,7 @@ BOOL CALLBACK WindowEnumProcFind(HWND hwnd, LPARAM lParam) {
     return TRUE;
 }
 
-void SetMonitorResolution(MONITORINFOEX* mi) {
+static void SetMonitorResolution(MONITORINFOEX* mi) {
     DEVMODE dm = {};
     dm.dmSize = sizeof(DEVMODE);
     dm.dmPelsWidth = SUBMON_WIDTH;  // Desired width

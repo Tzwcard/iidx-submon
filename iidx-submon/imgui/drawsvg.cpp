@@ -7,12 +7,31 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <windows.h>
 #include <imgui.h>
 
 #include "drawsvg.h"
 
+static std::string ConvertColorToSVG(ImU32 col);
+static void ExportDrawDataToSVG(const char* filename, ImDrawData* draw_data);
+
+static bool _is_last_pressed_draw = false;
+
+int CheckSVGExport(void) {
+    if (GetAsyncKeyState(VK_SNAPSHOT) & 0x8000) {
+        if (!_is_last_pressed_draw) {
+            ImGui::EndFrame();
+            ImDrawData* draw_list = ImGui::GetDrawData();
+            ExportDrawDataToSVG("output.svg", draw_list);
+        }
+        _is_last_pressed_draw = true;
+    }
+    else
+        _is_last_pressed_draw = false;
+}
+
 // Helper function to convert ImU32 to an SVG-compatible color string
-std::string ConvertColorToSVG(ImU32 col) {
+static std::string ConvertColorToSVG(ImU32 col) {
     int r = (col >> IM_COL32_R_SHIFT) & 0xFF;
     int g = (col >> IM_COL32_G_SHIFT) & 0xFF;
     int b = (col >> IM_COL32_B_SHIFT) & 0xFF;
@@ -22,7 +41,7 @@ std::string ConvertColorToSVG(ImU32 col) {
     return oss.str();
 }
 
-void ExportDrawDataToSVG(const char* filename, ImDrawData* draw_data) {
+static void ExportDrawDataToSVG(const char* filename, ImDrawData* draw_data) {
     if (!draw_data) return;
 
     // Canvas size from ImGui's display size
@@ -57,7 +76,7 @@ void ExportDrawDataToSVG(const char* filename, ImDrawData* draw_data) {
             const ImDrawIdx* idx_buffer = draw_list->IdxBuffer.Data + cmd.IdxOffset;
             const ImDrawVert* vtx_buffer = draw_list->VtxBuffer.Data + cmd.VtxOffset;
 
-            for (int i = 0; i < cmd.ElemCount; i += 3) {
+            for (unsigned int i = 0; i < cmd.ElemCount; i += 3) {
                 const ImDrawVert& v0 = vtx_buffer[idx_buffer[i]];
                 const ImDrawVert& v1 = vtx_buffer[idx_buffer[i + 1]];
                 const ImDrawVert& v2 = vtx_buffer[idx_buffer[i + 2]];
