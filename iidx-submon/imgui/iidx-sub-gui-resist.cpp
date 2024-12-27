@@ -31,6 +31,11 @@ int _RESIST::init(ImVec2 pos, ImVec2 size, float line) {
 		pos.y + 7.5f * _unit
 	);
 
+	_turntable_center[0] = ImVec2(
+		pos.x + _space_width / 2,
+		pos.y + 4.5f * _unit
+	);
+
 	_slider_check_area[0][0] = ImVec2(
 		_space_width,
 		1.5f * _unit
@@ -51,6 +56,11 @@ int _RESIST::init(ImVec2 pos, ImVec2 size, float line) {
 		pos.y + 7.5f * _unit
 	);
 
+	_turntable_center[1] = ImVec2(
+		pos.x + (size.x - _space_width / 2),
+		pos.y + 4.5f * _unit
+	);
+
 	_slider_check_area[1][0] = ImVec2(
 		size.x - _space_width - bar_width,
 		1.5f * _unit
@@ -60,6 +70,8 @@ int _RESIST::init(ImVec2 pos, ImVec2 size, float line) {
 		size.x - _space_width,
 		7.5f * _unit
 	);
+
+	_turntable_radius = _space_width / 2 - _space_width * 0.05f;
 
 	return 1;
 }
@@ -88,8 +100,8 @@ unsigned char _RESIST::get(int id) {
 }
 
 int _RESIST::draw(ImDrawList* drawList) {
-
 	for (int i = 0; i < 2; i++) {
+#if 0
 		// Frame
 		drawList->AddRect(
 			_frame[i][0],
@@ -99,6 +111,51 @@ int _RESIST::draw(ImDrawList* drawList) {
 			0,
 			1.f
 		);
+#else
+		// TT
+		drawList->AddCircle(
+			_turntable_center[i],
+			_turntable_radius,
+			COL_WHITE,
+			0,
+			2.f
+		);
+
+		drawList->AddCircleFilled(
+			_turntable_center[i],
+			_turntable_radius * 0.35f,
+			COL_WHITE
+		);
+
+		drawList->AddCircleFilled(
+			_turntable_center[i],
+			_turntable_radius * 0.04f,
+			COL_BLACK
+		);
+
+		_spin_deg[i] += 6 - 3.0f * (get(i) / 255.f);
+
+		if (_spin_deg[i] > 360.f) _spin_deg[i] -= 360.f;
+
+		// Convert degree to radians
+		for (int j = 0; j < 3; j++) {
+			float radians = (_spin_deg[i] + j * 120.f) * 3.14159265358979323846f / 180.0f;
+
+			drawList->AddLine(
+				ImVec2(
+					_turntable_center[i].x + _turntable_radius * cos(radians) * 0.75f, // X coordinate
+					_turntable_center[i].y + _turntable_radius * sin(radians) * 0.75f  // Y coordinate
+				),
+				ImVec2(
+					_turntable_center[i].x + _turntable_radius * cos(radians) * 0.95f, // X coordinate
+					_turntable_center[i].y + _turntable_radius * sin(radians) * 0.95f  // Y coordinate
+				),
+				COL_WHITE,
+				2.f
+			);
+		}
+
+#endif
 
 		// BAR
 		float space_bar_top = _unit;

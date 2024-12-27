@@ -9,7 +9,9 @@ private:
 	ImVec2 _slider_draw_area[2][2];
 	ImVec2 _frame[2][2];
 	ImVec2 _slider_check_area[2][2];
+	ImVec2 _turntable_center[2];
 	float _frame_width = 1.f;
+	float _turntable_radius = 1.f;
 	ImVec2 _slot = ImVec2(20.f, 100.f);
 
 	float _unit = 20.f;
@@ -18,10 +20,12 @@ private:
 	int _touch_active = -1;
 	float _font_size = 10.f;
 
+	float _spin_deg[2] = { 0.f };
+
 public:
 	_RESIST() {
-		_val[0] = .5f;
-		_val[1] = .5f;
+		_val[0] = .45f;
+		_val[1] = .45f;
 
 		_touch_active = -1;
 	};
