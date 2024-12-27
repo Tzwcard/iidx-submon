@@ -15,8 +15,7 @@ static callable_iidx_submon_finl iidx_submon_finl;
 ...
     hMod = LoadLibrary(L"iidx-submon.dll");
     if (hMod) {
-        iidx_submon_init = (hMod)GetProcAddress(hmodule_submon, "iidx_submon_init");
-        iidx_submon_get_resist = (callable_iidx_submon_get_resist)GetProcAddress(hMod, "iidx_submon_get_resist");
+        iidx_submon_init = (hMod)GetProcAddress(hMod, "iidx_submon_init");
         iidx_submon_set_16seg = (callable_iidx_submon_set_16seg)GetProcAddress(hMod, "iidx_submon_set_16seg");
         iidx_submon_finl = (callable_iidx_submon_finl)GetProcAddress(hMod, "iidx_submon_finl");
 
