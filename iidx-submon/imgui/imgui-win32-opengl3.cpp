@@ -32,6 +32,9 @@
 #ifdef DEBUG_BUILD
 #define USE_CUSTOM_RESOLUTION
 // #define DRAW_IMG_CLICKER
+
+#include "drawsvg.h"
+static bool _is_last_pressed_draw = false;
 #endif
 
 struct CTX_FINDMONITOR {
@@ -321,9 +324,22 @@ int gui_main(void)
             ImGui::End();
         }
 #endif
-
         // Rendering
         ImGui::Render();
+
+#ifdef DEBUG_BUILD
+        if (GetAsyncKeyState(VK_SNAPSHOT) & 0x8000) {
+            if (!_is_last_pressed_draw) {
+                ImGui::EndFrame();
+                ImDrawData* draw_list = ImGui::GetDrawData();
+                ExportDrawDataToSVG("output.svg", draw_list);
+            }
+            _is_last_pressed_draw = true;
+        }
+        else
+            _is_last_pressed_draw = false;
+#endif
+
         glViewport(0, 0, g_Width, g_Height);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);

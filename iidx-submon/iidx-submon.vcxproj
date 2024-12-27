@@ -153,6 +153,7 @@
     <ClInclude Include="imgui\backend\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\backend\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="imgui\backend\imgui_impl_win32.h" />
+    <ClInclude Include="imgui\drawsvg.h" />
     <ClInclude Include="imgui\iidx-sub-gui-defs.h" />
     <ClInclude Include="imgui\iidx-sub-gui-16seg.h" />
     <ClInclude Include="imgui\iidx-sub-gui-effector.h" />
@@ -173,6 +174,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="imgui\backend\imgui_impl_win32.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="imgui\drawsvg.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
