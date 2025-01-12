@@ -138,14 +138,28 @@ int _KEYPAD::draw(ImDrawList* drawList) {
 			0
 		);
 
-		drawList->AddText(
-			NULL,
-			_font_size,
-			ImVec2((a.draw[0].x + a.draw[1].x - _font_size * strlen(lookup_charas[a.idx % 12]) / 2) / 2,
-				(a.draw[0].y + a.draw[1].y - _font_size) / 2),
-			(lookup_table[a.idx % 12] & keypad[a.side & 1]) ? COL_BLACK : COL_WHITE,
-			lookup_charas[a.idx % 12]
-		);
+		if (_font) {
+			ImVec2 sz = _font->CalcTextSizeA(_font_size, FLT_MAX, -1.0f, lookup_charas[a.idx % 12], NULL, NULL);
+			drawList->AddText(
+				_font,
+				_font_size,
+				ImVec2((a.draw[0].x + a.draw[1].x - sz.x) / 2,
+					(a.draw[0].y + a.draw[1].y - sz.y) / 2),
+				(lookup_table[a.idx % 12] & keypad[a.side & 1]) ? COL_BLACK : COL_WHITE,
+				lookup_charas[a.idx % 12]
+			);
+		}
+		else {
+			drawList->AddText(
+				_font,
+				_font_size,
+				ImVec2((a.draw[0].x + a.draw[1].x - _font_size * strlen(lookup_charas[a.idx % 12]) / 2) / 2,
+					(a.draw[0].y + a.draw[1].y - _font_size) / 2),
+				(lookup_table[a.idx % 12] & keypad[a.side & 1]) ? COL_BLACK : COL_WHITE,
+				lookup_charas[a.idx % 12]
+			);
+		}
+
 	}
 
 	return 1;

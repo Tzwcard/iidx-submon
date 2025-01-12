@@ -11,6 +11,7 @@ private:
 	ImVec2 _frame_pos[2] = { ImVec2(100.f, 100.f), ImVec2(200.f, 200.f) };
 	float _frame_width = 1.f;
 	ImVec2 _slot = ImVec2(20.f, 100.f);
+	ImFont* _font = NULL;
 
 	float _unit = 20.f;
 	float _eff_width = 20.f;
@@ -28,7 +29,12 @@ public:
 
 		_touch_active = -1;
 	};
+
 	~_EFFECTOR() = default;
+
+	void setfont(void* a) {
+		if (a) _font = (ImFont*)a;
+	}
 
 	int init(ImVec2 pos, ImVec2 size, float line);
 	int draw(ImDrawList* drawList);

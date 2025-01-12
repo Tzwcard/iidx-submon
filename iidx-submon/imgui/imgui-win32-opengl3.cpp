@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include "imgui-win32-opengl3.h"
+#include "../misc/flexure.ttf.h"
 
 #include "iidx-sub-gui.h"
 
@@ -244,6 +245,25 @@ int gui_main(void)
         platform_io.Platform_RenderWindow = Hook_Platform_RenderWindow;
     }
 
+    // For some unknown reason, if I delete font data below the program will just crash on exit randomly
+    // So keep the loaded font data in memory, then delete it AFTER all gui stuffs
+    unsigned char* font_data_load = NULL;
+    ImFont* flexure = NULL;
+    {
+        const unsigned char* font_data = NULL;
+        long font_size = _get_font(&font_data);
+        
+        if (font_size > 0) {
+            unsigned char* font_data_load = new unsigned char[font_size];
+            memcpy(font_data_load, font_data, font_size);
+            // io.Fonts->Clear();
+            io.Fonts->AddFontDefault();
+            flexure = io.Fonts->AddFontFromMemoryTTF(font_data_load, font_size, 60.f, NULL, io.Fonts->GetGlyphRangesDefault());
+            iidx_sub_gui_set_panel_font(flexure);
+            io.Fonts->Build();
+        }
+    }
+
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -355,6 +375,8 @@ int gui_main(void)
         ::SwapBuffers(g_MainWindow.hDC);
     }
 
+    iidx_sub_gui_set_panel_font(NULL);
+
     if (is_touch_available) {
         if (hwnd_iidx) {
             UninstallTouchHook();
@@ -371,6 +393,10 @@ int gui_main(void)
     wglDeleteContext(g_hRC);
     ::DestroyWindow(hwnd_submon);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+
+    if (font_data_load) {
+        delete[]font_data_load;
+    }
 
     return 0;
 }

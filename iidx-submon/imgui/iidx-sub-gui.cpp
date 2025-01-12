@@ -99,6 +99,11 @@ static _LED _led;
 /************** KEYPAD **************/
 static _KEYPAD _keypad;
 
+void iidx_sub_gui_set_panel_font(void *a) {
+    _eff.setfont(a);
+    _keypad.setfont(a);
+}
+
 int iidx_sub_gui(void) {
     get_io();
 

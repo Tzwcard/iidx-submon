@@ -9,14 +9,16 @@ private:
 	ImVec2 dp;
 	float r_dp;
 
-	std::vector<ImVec2>* _draw[16] = {
+	std::vector<std::vector<ImVec2>*> _draw = {
 		&a1, &a2, &b, &c, &d2, &d1, &e, &f, &h, &i, &j, &g2, &m, &l, &k, &g1,
 	};
 	bool _draw_red[17] = { 0 };
 
 public:
 	_16SEG() = default;
-	~_16SEG() = default;
+	~_16SEG() {
+		_draw.clear();
+	}
 
 	int init(ImVec4);
 	int set_draw(uint32_t);

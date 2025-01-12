@@ -28,6 +28,8 @@ int CheckSVGExport(void) {
     }
     else
         _is_last_pressed_draw = false;
+
+    return 1;
 }
 
 // Helper function to convert ImU32 to an SVG-compatible color string

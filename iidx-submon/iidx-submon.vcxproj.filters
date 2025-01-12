@@ -19,6 +19,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{1508158e-75cb-4d0f-8c15-963905a1cfa3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -69,6 +72,9 @@
     <ClInclude Include="imgui\drawsvg.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="misc\flexure.ttf.h">
+      <Filter>misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -112,6 +118,9 @@
     </ClCompile>
     <ClCompile Include="imgui\drawsvg.cpp">
       <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="misc\flexure.ttf.cpp">
+      <Filter>misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

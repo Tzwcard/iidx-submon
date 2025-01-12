@@ -11,6 +11,8 @@ static const char* SLIDER_TEXT[0x10] = {
 	"filter",
 	"play\nvolume"
 };
+static const char* BOTTOM_TEXT_0 = "Five effect system",
+* BOTTOM_TEXT_1 = "Adjust the effect switches inaccordance with your taste. It does not affect judgement of your play.";
 
 int _EFFECTOR::init(ImVec2 pos, ImVec2 size, float line) {
 	_unit = size.y / 9.f;
@@ -59,7 +61,7 @@ int _EFFECTOR::init(ImVec2 pos, ImVec2 size, float line) {
 		_draw_start.x += _eff_width;
 	}
 
-	_font_size = size.x * 0.008333f;
+	_font_size = size.x * 0.012f;
 
 	return 1;
 }
@@ -86,6 +88,34 @@ int _EFFECTOR::draw(ImDrawList* drawList) {
 		4.f
 	);
 
+	if (_font) {
+		ImVec2 sz = _font->CalcTextSizeA(2 * _font_size, FLT_MAX, -1.0f, BOTTOM_TEXT_0, NULL, NULL);
+		drawList->AddText(
+			_font,
+			2 * _font_size,
+			ImVec2(
+				(_frame_pos[1].x + _frame_pos[0].x) / 2.f - sz.x / 2.f,
+				_frame_pos[1].y - _unit * 1.f
+			),
+			COL_BLACK,
+			BOTTOM_TEXT_0
+		);
+	}
+
+	if (_font) {
+		ImVec2 sz = _font->CalcTextSizeA(_font_size, FLT_MAX, -1.0f, BOTTOM_TEXT_1, NULL, NULL);
+		drawList->AddText(
+			_font,
+			_font_size,
+			ImVec2(
+				(_frame_pos[1].x + _frame_pos[0].x) / 2.f - sz.x / 2.f,
+				_frame_pos[1].y - _unit * .4f
+			),
+			COL_BLACK,
+			BOTTOM_TEXT_1
+		);
+	}
+
 	ImVec2 _draw_start = _frame_pos[0];
 	for (int i = 0; i < 5; i++) {
 		float space_left = _eff_width / 11.f;
@@ -93,9 +123,9 @@ int _EFFECTOR::draw(ImDrawList* drawList) {
 
 		// TEXT
 		drawList->AddText(
-			NULL,
-			i == 4 ? _font_size : 2 * _font_size,
-			ImVec2(_draw_start.x + space_left, _draw_start.y + 0.5f * _unit),
+			_font,
+			i == 4 ? 1.2f * _font_size : 2 * _font_size,
+			ImVec2(_draw_start.x + space_left, _draw_start.y + 0.2f * _unit),
 			COL_WHITE,
 			SLIDER_TEXT[i]
 		);
