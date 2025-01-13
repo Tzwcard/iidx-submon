@@ -59,6 +59,7 @@ static int              g_Height;
 
 static HWND hwnd_submon = nullptr, hwnd_iidx = nullptr;
 static HMONITOR hmon_submon = nullptr;
+static int iidx_slider_type = -1;
 
 // Forward declarations of helper functions
 bool CreateDeviceWGL(HWND hWnd, WGL_WindowData* data);
@@ -245,25 +246,6 @@ int gui_main(void)
         platform_io.Platform_RenderWindow = Hook_Platform_RenderWindow;
     }
 
-    // For some unknown reason, if I delete font data below the program will just crash on exit randomly
-    // So keep the loaded font data in memory, then delete it AFTER all gui stuffs
-    unsigned char* font_data_load = NULL;
-    ImFont* flexure = NULL;
-    {
-        const unsigned char* font_data = NULL;
-        long font_size = _get_font(&font_data);
-        
-        if (font_size > 0) {
-            unsigned char* font_data_load = new unsigned char[font_size];
-            memcpy(font_data_load, font_data, font_size);
-            // io.Fonts->Clear();
-            io.Fonts->AddFontDefault();
-            flexure = io.Fonts->AddFontFromMemoryTTF(font_data_load, font_size, 60.f, NULL, io.Fonts->GetGlyphRangesDefault());
-            iidx_sub_gui_set_panel_font(flexure);
-            io.Fonts->Build();
-        }
-    }
-
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -280,10 +262,32 @@ int gui_main(void)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
 
+    // For some unknown reason, if I delete font data below the program will just crash on exit randomly
+    // So keep the loaded font data in memory, then delete it AFTER all gui stuffs
+    unsigned char* font_data_load = NULL;
+    ImFont* flexure = NULL;
+    {
+        const unsigned char* font_data = NULL;
+        long font_size = _get_font(&font_data);
+
+        if (font_size > 0) {
+            unsigned char* font_data_load = new unsigned char[font_size];
+            memcpy(font_data_load, font_data, font_size);
+            // io.Fonts->Clear();
+            io.Fonts->AddFontDefault();
+            flexure = io.Fonts->AddFontFromMemoryTTF(font_data_load, font_size, 60.f, NULL, io.Fonts->GetGlyphRangesDefault());
+            iidx_sub_gui_set_panel_font(flexure);
+            io.Fonts->Build();
+        }
+    }
+
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    // Set slider text type here
+    iidx_sub_gui_set_silder_type(iidx_slider_type);
 
     // Main loop
     done = false;
@@ -494,18 +498,23 @@ static BOOL CALLBACK WindowEnumProcFind(HWND hwnd, LPARAM lParam) {
         bool is_match = false;
         if (!strcmp("C02", className)) {
             is_match = true;
+            iidx_slider_type = 1;
         }
         else {
             for (int i = 0; i < _countof(bm2dx_class_prefix) && !is_match; i++) {
                 if (!strncmp(bm2dx_class_prefix[i], className, strlen(bm2dx_class_prefix[i]))) {
                     is_match = true;
+                    iidx_slider_type = 1;
                 }
             }
         }
 
         // Add MAME emulator check if want to use on Twinkle games
+        // And because only old styles(1st - 8th) uses "track volume" instead of "filter" effector
+        // that conviently only runs under MAME(by far) we can set the silder type here as 0
         if (!is_match && !strcmp("MAME", className)) {
             is_match = true;
+            iidx_slider_type = 0;
         }
 
         if (is_match) {

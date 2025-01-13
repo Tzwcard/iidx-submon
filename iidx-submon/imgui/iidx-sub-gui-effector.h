@@ -8,6 +8,7 @@ private:
 	float _val[5];
 	ImVec2 _slider_draw_area[5][2];
 	ImVec2 _slider_check_area[5][2];
+	int _slider_txt_idx[5];
 	ImVec2 _frame_pos[2] = { ImVec2(100.f, 100.f), ImVec2(200.f, 200.f) };
 	float _frame_width = 1.f;
 	ImVec2 _slot = ImVec2(20.f, 100.f);
@@ -27,6 +28,12 @@ public:
 		_val[3] = 1.f;
 		_val[4] = 1.f;
 
+		_slider_txt_idx[0] = 0;
+		_slider_txt_idx[1] = 1;
+		_slider_txt_idx[2] = 2;
+		_slider_txt_idx[3] = 3;
+		_slider_txt_idx[4] = 4;
+
 		_touch_active = -1;
 	};
 
@@ -34,6 +41,10 @@ public:
 
 	void setfont(void* a) {
 		if (a) _font = (ImFont*)a;
+	}
+
+	void set4thslider(bool is_new) {
+		_slider_txt_idx[3] = is_new ? 3 : 5;
 	}
 
 	int init(ImVec2 pos, ImVec2 size, float line);

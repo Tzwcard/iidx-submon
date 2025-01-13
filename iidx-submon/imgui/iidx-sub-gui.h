@@ -18,4 +18,6 @@ char iidx_sub_gui_get_slider(char);
 uint32_t iidx_sub_gui_get_led_mask(void);
 uint16_t iidx_sub_gui_get_keypad(char);
 
+void iidx_sub_gui_set_silder_type(int);
+
 void get_touch_info(HWND gui_hwnd, MSG* msg);

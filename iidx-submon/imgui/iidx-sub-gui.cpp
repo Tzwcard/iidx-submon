@@ -104,6 +104,12 @@ void iidx_sub_gui_set_panel_font(void *a) {
     _keypad.setfont(a);
 }
 
+void iidx_sub_gui_set_silder_type(int t) {
+    if (t >= 0) {
+        _eff.set4thslider(t > 0 ? true : false);
+    }
+}
+
 int iidx_sub_gui(void) {
     get_io();
 

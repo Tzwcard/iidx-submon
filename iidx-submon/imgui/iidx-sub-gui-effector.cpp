@@ -9,7 +9,8 @@ static const char* SLIDER_TEXT[0x10] = {
 	"low-EQ",
 	"hi-EQ",
 	"filter",
-	"play\nvolume"
+	"play\nvolume",
+	"track\nvolume"
 };
 static const char* BOTTOM_TEXT_0 = "Five effect system",
 * BOTTOM_TEXT_1 = "Adjust the effect switches inaccordance with your taste. It does not affect judgement of your play.";
@@ -117,18 +118,44 @@ int _EFFECTOR::draw(ImDrawList* drawList) {
 	}
 
 	ImVec2 _draw_start = _frame_pos[0];
+	float line_scale = 0.7f;
+	ImVec2 sz_txt = ImVec2(0.f, 0.f);
+	if (_font) {
+		sz_txt = _font->CalcTextSizeA(2.f * _font_size, FLT_MAX, -1.0f, "DUMMY", NULL, NULL);
+	}
+
 	for (int i = 0; i < 5; i++) {
 		float space_left = _eff_width / 11.f;
 		float bar_width = _eff_width * 0.43f;
+		const char* txt_ptr = SLIDER_TEXT[_slider_txt_idx[i]];
 
 		// TEXT
-		drawList->AddText(
-			_font,
-			i == 4 ? 1.2f * _font_size : 2 * _font_size,
-			ImVec2(_draw_start.x + space_left, _draw_start.y + 0.2f * _unit),
-			COL_WHITE,
-			SLIDER_TEXT[i]
-		);
+		if (_font) {
+			const char* ptr = strchr(txt_ptr, '\n');
+			for (int j = 0; j < (ptr ? 2 : 1); j++) {
+				drawList->AddText(
+					_font,
+					2.f * _font_size,
+					ImVec2(
+						_draw_start.x + space_left,
+						_draw_start.y + (_unit - sz_txt.y * ((ptr ? line_scale : 0) + 1.f)) / 2 + (j == 1 ? line_scale : 0) * sz_txt.y
+					),
+					COL_WHITE,
+					j == 0 ? txt_ptr : (ptr + 1),
+					j == 0 ? ptr : 0
+				);
+			}
+
+		}
+		else {
+			drawList->AddText(
+				_font,
+				strchr(txt_ptr, '\n') ? 1.2f * _font_size : 2.f * _font_size,
+				ImVec2(_draw_start.x + space_left, _draw_start.y + 0.2f * _unit),
+				COL_WHITE,
+				txt_ptr
+			);
+		}
 
 		// BAR
 		float space_bar_top = _unit;
