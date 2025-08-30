@@ -262,16 +262,16 @@ int gui_main(void)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
 
-    // For some unknown reason, if I delete font data below the program will just crash on exit randomly
-    // So keep the loaded font data in memory, then delete it AFTER all gui stuffs
-    unsigned char* font_data_load = NULL;
+    // According to github, ImGui will take ownership of the memory
+    // that malloc() and free() it itself
+    void* font_data_load = NULL;
     ImFont* flexure = NULL;
     {
         const unsigned char* font_data = NULL;
         long font_size = _get_font(&font_data);
 
         if (font_size > 0) {
-            unsigned char* font_data_load = new unsigned char[font_size];
+            font_data_load = malloc(font_size);
             memcpy(font_data_load, font_data, font_size);
             // io.Fonts->Clear();
             io.Fonts->AddFontDefault();
@@ -397,10 +397,6 @@ int gui_main(void)
     wglDeleteContext(g_hRC);
     ::DestroyWindow(hwnd_submon);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
-
-    if (font_data_load) {
-        delete[]font_data_load;
-    }
 
     return 0;
 }
